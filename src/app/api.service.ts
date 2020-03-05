@@ -72,6 +72,12 @@ export class ApiService {
       this.putHeader(token)
     );
   }
+
+  getCurrentUser<Observable>(token: string) {
+    return this.http.get<User>(this.path + `me/`,
+      this.getHeader
+    );
+  }
 }
 
 export class Token {
@@ -101,4 +107,9 @@ export class Card {
 export class CardPutt {
   text: string;
   blanks: number;
+}
+
+export class User {
+  username: string;
+  disabled: boolean;
 }
