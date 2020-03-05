@@ -1,16 +1,14 @@
 <div class="content">
-<div>
-    <mat-form-field>
-      <mat-label>Brukernavn</mat-label>
-      <input matInput>
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit(loginForm.value)">
+  <mat-form-field>
+      <mat-label for="username">Brukernavn</mat-label>
+      <input matInput id="username" type="text" formControlName="username">
     </mat-form-field>
     <br>
     <mat-form-field>
-      <mat-label>Passord</mat-label>
-      <input matInput>
+      <mat-label for="password">Passord</mat-label>
+      <input matInput id="password" type="password" formControlName="password">
     </mat-form-field>
-</div>
-
-
-<a [routerLink]="['/home']"><button mat-raised-button color="primary">Logg inn</button></a>
-</div>
+    <br>
+    <button mat-raised-button type="submit">Logg inn</button>
+</form>

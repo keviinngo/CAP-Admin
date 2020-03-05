@@ -44,6 +44,7 @@ import {MatTreeModule} from '@angular/material/tree';
 import { RouterModule } from '@angular/router';
 import { LoggInnComponent } from './logg-inn/logg-inn.component';
 import { HomeComponent } from './home/home.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -96,6 +97,7 @@ import { HomeComponent } from './home/home.component';
     FormsModule,
     ReactiveFormsModule,
     MatFormFieldModule,
+    HttpClientModule,
     RouterModule.forRoot([
     {path: '', component: LoggInnComponent},
     {path: 'home', component: HomeComponent},
