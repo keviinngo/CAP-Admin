@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, FormGroup } from '@angular/forms';
 import { ApiService, Token } from '../api.service';
-import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { tokenName } from '@angular/compiler';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-logg-inn',
@@ -11,29 +10,33 @@ import { tokenName } from '@angular/compiler';
   styleUrls: ['./logg-inn.component.css']
 })
 export class LoggInnComponent implements OnInit {
-  loginForm;
-  apiService;
-  token: Observable<Token>;
+  loginForm: FormGroup;
+  token: string;
 
   constructor(
     private formBuilder: FormBuilder,
-    private http: HttpClient
+    private apiService: ApiService,
+    private router: Router,
   ) {
     this.loginForm = this.formBuilder.group({
       username: '',
       password: ''
     });
-
-    this.apiService = new ApiService(http);
    }
 
   ngOnInit(): void {
+    this.apiService.getCurrentUser(user => {
+      if (user) {
+        this.router.navigateByUrl('/home')
+      } 
+    })
   }
 
-  async onSubmit(data: FormData) {
-    this.token = this.apiService.getToken(data['username'], data['password']);
-    this.token.subscribe(data => {
-      console.log(data.access_token);
+  onSubmit(data: FormData) {
+    this.apiService.logInn(data['username'], data['password'], (data) => {
+      if(data) {
+        this.router.navigateByUrl('/home');
+      }
     });
     this.loginForm.reset();
   }
