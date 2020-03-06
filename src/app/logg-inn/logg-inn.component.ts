@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { ApiService, Token } from '../api.service';
 import { Observable } from 'rxjs';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-logg-inn',
@@ -10,11 +11,12 @@ import { Observable } from 'rxjs';
 })
 export class LoggInnComponent implements OnInit {
   loginForm: FormGroup;
-  token: Observable<Token>;
+  token: string;
 
   constructor(
     private formBuilder: FormBuilder,
-    private api: ApiService,
+    private apiService: ApiService,
+    private router: Router,
   ) {
     this.loginForm = this.formBuilder.group({
       username: '',
@@ -23,12 +25,18 @@ export class LoggInnComponent implements OnInit {
    }
 
   ngOnInit(): void {
+    this.apiService.getCurrentUser(user => {
+      if (user) {
+        this.router.navigateByUrl('/home')
+      } 
+    })
   }
 
   onSubmit(data: FormData) {
-    this.token = this.api.getToken(data['username'], data['password']);
-    this.token.subscribe(data => {
-      console.log(data.access_token);
+    this.apiService.logInn(data['username'], data['password'], (data) => {
+      if(data) {
+        this.router.navigateByUrl('/home');
+      }
     });
     this.loginForm.reset();
   }

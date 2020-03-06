@@ -1,12 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { LocalStorage } from '@ngx-pwa/local-storage';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
-  private path = 'https://cap.thebirk.net/'
+  private path = 'https://cap.thebirk.net/';
+  private token = {'token': ''}
+  private decks: Deck[];
+  private cards: Card[];
 
   private tokenHeader = {
     headers: new HttpHeaders({
@@ -33,13 +37,28 @@ export class ApiService {
     })
   }
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private localStorage: LocalStorage
+    ) { }
+
+  logInn(username: string, password: string, callback: (data) => void) {
+    this.getToken(username, password).subscribe(data => {
+      if (data.access_token != null) {
+        this.token['token'] = data.access_token;
+        this.localStorage.setItem('token', this.token).subscribe(() => {});
+        callback(data);
+      } else {
+        console.error('Invalid username or password')
+      }
+    });
+  }
 
   getToken(username: string, password: string): Observable<Token> {
     return this.http.post<Token>(this.path + 'token/', 
     `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
     this.tokenHeader
-    );
+    )
   }
 
   getDecks(): Observable<Deck[]> {
@@ -74,10 +93,22 @@ export class ApiService {
     );
   }
 
-  getCurrentUser(token: string): Observable<User> {
-    return this.http.get<User>(this.path + `me/`,
-      this.getHeader
-    );
+  getCurrentUser(callback: (data: User) => void) {
+    this.localStorage.getItem('token').subscribe(token => {
+      this.http.get<User>(this.path + 'me/',
+      this.putHeader(token['token'])
+      ).subscribe(user => {
+        console.log(user);
+        if(user != null) {
+          callback(user);
+        }
+      },
+        error => {
+          console.error('Error')
+          callback(null);
+        }
+      )
+    })
   }
 }
 
