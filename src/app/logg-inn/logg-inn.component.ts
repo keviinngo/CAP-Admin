@@ -20,13 +20,12 @@ export class LoggInnComponent implements OnInit {
       username: '',
       password: ''
     });
-
    }
 
   ngOnInit(): void {
   }
 
-  async onSubmit(data: FormData) {
+  onSubmit(data: FormData) {
     this.token = this.api.getToken(data['username'], data['password']);
     this.token.subscribe(data => {
       console.log(data.access_token);

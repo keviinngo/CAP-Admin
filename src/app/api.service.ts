@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
   providedIn: 'root'
 })
 export class ApiService {
-  private path = 'http://127.0.0.1:8000/'
+  private path = 'https://cap.thebirk.net/'
 
   private tokenHeader = {
     headers: new HttpHeaders({
@@ -67,7 +67,7 @@ export class ApiService {
   }
 
   putDeck<Observable>(deck: DeckPutt, token: string) {
-    return this.http.put<DeckPutt>(this.path + `deck/`,
+    return this.http.put<Deck>(this.path + `deck/`,
       deck,
       this.putHeader(token)
     );
