@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -34,46 +35,46 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  getToken<Observable>(username: string, password: string) {
+  getToken(username: string, password: string): Observable<Token> {
     return this.http.post<Token>(this.path + 'token/', 
     `grant_type=&username=${username}&password=${password}&scope=&client_id=&client_secret=`,
     this.tokenHeader
     );
   }
 
-  getDecks<Observable>() {
+  getDecks(): Observable<Deck[]> {
     return this.http.get<Array<Deck>>(this.path + 'deck/alldecks/',
       this.getHeader
     );
   }
 
-  getDeck<Observable>(id: number) {
+  getDeck(id: number): Observable<Deck> {
     return this.http.get<Deck>(this.path + `deck/${id}`,
       this.getHeader
     );
   }
 
-  getCard<Observable>(id: number) {
+  getCard(id: number): Observable<Card> {
     return this.http.get<Card>(this.path + `card/${id}`,
       this.getHeader
     );
   }
 
-  putCard<Observable>(card: CardPutt, token: string) {
+  putCard(card: CardPutt, token: string): Observable<Card> {
     return this.http.put<Card>(this.path + `card/`,
       card,
       this.putHeader(token)
     );
   }
 
-  putDeck<Observable>(deck: DeckPutt, token: string) {
+  putDeck(deck: DeckPutt, token: string): Observable<Deck> {
     return this.http.put<Deck>(this.path + `deck/`,
       deck,
       this.putHeader(token)
     );
   }
 
-  getCurrentUser<Observable>(token: string) {
+  getCurrentUser(token: string): Observable<User> {
     return this.http.get<User>(this.path + `me/`,
       this.getHeader
     );
