@@ -61,8 +61,8 @@ export class ApiService {
     )
   }
 
-  getDecks(): Observable<Deck[]> {
-    return this.http.get<Array<Deck>>(this.path + 'deck/alldecks/',
+  getDecks(): Observable<DeckAll> {
+    return this.http.get<DeckAll>(this.path + 'deck/alldecks/',
       this.getHeader
     );
   }
@@ -117,17 +117,33 @@ export class Token {
   token_type: string
 }
 
-export class Deck {
+interface iDeck {
+  title: string;
+  description: string;
+ 
+}
+
+export class Deck implements iDeck {
   id: number;
   title: string;
   description: string;
   cards: Array<Card>;
 }
 
-export class DeckPutt {
+export class DeckPutt implements iDeck {
   title: string;
   description: string;
   cards: Array<number>;
+}
+
+export class DeckNoCards implements iDeck {
+  title: string;  description: string;
+  id: number;
+  
+}
+
+export class DeckAll{
+  decks: Array<DeckNoCards>;
 }
 
 export class Card {
