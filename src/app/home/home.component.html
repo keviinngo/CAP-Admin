@@ -3,11 +3,16 @@
 </div>
 
 <div *ngFor="let object of allDecks">
-    {{object.title}}, {{object.description}}
-    
-
-    
-</div>
+    <mat-card class="card">
+            <mat-card-header>
+                <mat-card-title> {{object.title}}</mat-card-title>
+            </mat-card-header>  
+            <mat-card-content>
+                {{object.description}}
+            </mat-card-content> 
+            <button mat-raised-button color="primary">Edit</button>
+    </mat-card>
+ </div>
 
 
 
