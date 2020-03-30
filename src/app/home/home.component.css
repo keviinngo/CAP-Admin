@@ -11,8 +11,34 @@ table {
 }
 
 .card {
-    margin-left: 50px;
-    margin-right: 50px;
     margin-bottom: 50px;
-    margin-top: 50px;
 }
+
+.grid {
+    display: grid;
+    row-gap: 15px;
+    column-gap: 15px;
+
+    grid-template-columns: auto 45% 45% auto;
+    grid-template-rows: 5px auto 5px;
+  }
+
+  .deckContainer {
+    height: 85vh;
+    overflow: auto;
+    grid-column-start: 2;
+    grid-column-end: 3;
+    grid-row-start: 2;
+    grid-row-end: 3;
+  }
+
+  .cardsContainer {
+    height: 85vh;
+    overflow: auto;
+    grid-column: 3 / 4;
+    grid-row: 2/3;
+  }
+
+  .deck {
+      display: block;
+  }

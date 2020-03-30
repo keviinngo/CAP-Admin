@@ -1,18 +1,54 @@
-<div class="content">
-    <h1 class="mat-display-1">Administrate Card & Deck</h1>
+<div class="grid">
+    <div class="deckContainer">
+        <div *ngFor="let object of allDecks">
+            <mat-card class="card">
+                    <mat-card-header>
+                        <mat-card-title> {{object.title}}</mat-card-title>
+                    </mat-card-header>  
+                    <mat-card-content>
+                        {{object.description}}
+                    </mat-card-content> 
+                    <button mat-raised-button color="primary" (click)="showDeck(object.id)">Edit</button>
+            </mat-card>
+         </div>
+    </div>
+    <div class="cardsContainer">
+        <div *ngIf="deck; else noSelectedDeckBlock"> 
+            <mat-card class="deck">
+                <mat-card-header>
+                    <mat-card-title>
+                        {{deck.title}}
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content *ngFor="let card of deck.cards">
+                    <mat-card>
+                        <mat-card-content>
+                            <p>
+                                {{card.text}}
+                            </p>
+                            <div>
+                                <p *ngIf="card.blanks != 0; else isWhite">
+                                    Black card with {{card.blanks}} blanks
+                                </p>
+                                <button mat-raised-button color="primary" (click)="editCard(card)">Edit</button>
+                            </div>
+                            <ng-template #isWhite>
+                                <p>
+                                    is White
+                                </p>
+                            </ng-template>
+                        </mat-card-content>
+                    </mat-card>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+    <ng-template #noSelectedDeckBlock>
+        <h1>
+            Please select a deck
+        </h1>
+    </ng-template>
 </div>
-
-<div *ngFor="let object of allDecks">
-    <mat-card class="card">
-            <mat-card-header>
-                <mat-card-title> {{object.title}}</mat-card-title>
-            </mat-card-header>  
-            <mat-card-content>
-                {{object.description}}
-            </mat-card-content> 
-            <button mat-raised-button color="primary">Edit</button>
-    </mat-card>
- </div>
 
 
 

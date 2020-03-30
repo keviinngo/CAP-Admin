@@ -139,7 +139,6 @@ export class DeckPutt implements iDeck {
 export class DeckNoCards implements iDeck {
   title: string;  description: string;
   id: number;
-  
 }
 
 export class DeckAll{

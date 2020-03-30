@@ -43,7 +43,7 @@ import {MatTreeModule} from '@angular/material/tree';
 
 import { RouterModule } from '@angular/router';
 import { LoggInnComponent } from './logg-inn/logg-inn.component';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent, EditCardDialog } from './home/home.component';
 import { HttpClientModule } from '@angular/common/http';
 
 
@@ -53,7 +53,8 @@ import { HttpClientModule } from '@angular/common/http';
   declarations: [
     AppComponent,
     LoggInnComponent,
-    HomeComponent
+    HomeComponent,
+    EditCardDialog,
   ],
   imports: [
     BrowserModule,
