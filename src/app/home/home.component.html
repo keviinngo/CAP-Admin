@@ -1,82 +1,54 @@
 <div class="grid">
     <div class="deckContainer">
-        <div *ngFor="let object of allDecks">
-            <mat-card class="card">
-                    <mat-card-header>
-                        <mat-card-title> {{object.title}}</mat-card-title>
-                    </mat-card-header>  
-                    <mat-card-content>
-                        {{object.description}}
-                    </mat-card-content> 
-                    <button mat-raised-button color="primary" (click)="showDeck(object.id)">Edit</button>
+        <h1 class="title">
+            Decks
+        </h1>
+        <h1 id="deckSearch">
+            Search
+        </h1>
+        <div id="listDecks">
+            <mat-card *ngFor="let object of allDecks" style="margin-top: 5px; margin-bottom: 5px;">
+                <mat-card-content>
+                    <h3>
+                        {{object.title}}
+                    </h3>
+                    <br>
+                    {{object.description}}
+                </mat-card-content> 
+                <button mat-raised-button color="primary" (click)="showDeck(object.id)">Edit</button>
             </mat-card>
          </div>
     </div>
-    <div class="cardsContainer">
-        <div *ngIf="deck; else noSelectedDeckBlock"> 
-            <mat-card class="deck">
-                <mat-card-header>
-                    <mat-card-title>
-                        {{deck.title}}
-                    </mat-card-title>
-                </mat-card-header>
-                <mat-card-content *ngFor="let card of deck.cards">
-                    <mat-card>
-                        <mat-card-content>
-                            <p>
-                                {{card.text}}
-                            </p>
-                            <div>
-                                <p *ngIf="card.blanks != 0; else isWhite">
-                                    Black card with {{card.blanks}} blanks
-                                </p>
-                                <button mat-raised-button color="primary" (click)="editCard(card)">Edit</button>
-                            </div>
-                            <ng-template #isWhite>
-                                <p>
-                                    is White
-                                </p>
-                            </ng-template>
-                        </mat-card-content>
-                    </mat-card>
+    <div  *ngIf="deck; else noSelectedDeckBlock" class="cardsContainer">
+            <h1 id="deckTitle">{{deck.title}}</h1>
+            <h1 id="cardSearch">Search</h1>
+            <div id="listCards">
+            <mat-card *ngFor="let card of deck.cards" style="margin-top: 5px; margin-bottom: 5px;">
+                <mat-card-content>
+                    <h3>
+                        {{card.text}}
+                    </h3>
+                    <p *ngIf="card.blanks != 0; else isWhite">
+                        Black card with {{card.blanks}} {{ card.blanks > 1 ? "blanks" : "blank"}}
+                    </p>
+                    <ng-template #isWhite>
+                        <p>
+                            White card
+                        </p>
+                    </ng-template>
                 </mat-card-content>
+                <mat-card-actions>
+                    <button mat-raised-button color="primary" (click)="editCard(card)">Edit</button>
+                    <button mat-raised-button color="warn" (click)="deleteCard(card)">Delete</button>
+                </mat-card-actions>
             </mat-card>
         </div>
     </div>
     <ng-template #noSelectedDeckBlock>
-        <h1>
-            Please select a deck
-        </h1>
+        <div class="cardsContainer">
+            <h1>
+                Please select a deck
+            </h1>
+        </div>
     </ng-template>
 </div>
-
-
-
-<!--
-
-<form>
-    <h3>Choose deck</h3>
-    <mat-form-field>
-        <mat-select [(ngModel)]="selectedValue" name="deck">
-            <mat-option *ngFor="let deck of decks" [value]="deck.value">
-                {{deck.value}}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-    <p>Selected deck: {{selectedValue}}</p>
-</form>
-
-
-<mat-card class="card">
-    <mat-card-header>
-        <mat-card-title>{{selectedValue}}</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-        
-    </mat-card-content>
-    <mat-card-actions>
-        <button mat-button>Edit</button>
-        <button mat-button>Delete</button>
-    </mat-card-actions>
-</mat-card>
--->

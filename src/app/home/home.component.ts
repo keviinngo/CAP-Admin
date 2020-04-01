@@ -1,8 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { ApiService, DeckAll , DeckNoCards, Card} from '../api.service';
+import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt} from '../api.service';
 import { Router } from '@angular/router';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialog';
 
 
@@ -13,7 +12,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialo
 })
 export class HomeComponent implements OnInit {
   allDecks: DeckNoCards[];
-  deck = null;
+  deck: Deck = null;
 
   constructor(
     private apiService: ApiService,
@@ -32,22 +31,49 @@ export class HomeComponent implements OnInit {
       });
 
       //this.getAllDecks;
-
       this.apiService.getDecks().subscribe(decks => {
         this.allDecks = decks['decks'];
       });
   }
 
   showDeck(id: number): void {
-    this.deck = this.apiService.getDeck(id).subscribe( deck => {
+    this.apiService.getDeck(id).subscribe( deck => {
       this.deck = deck;
     });
   }
 
-  editCard(card: Card): void {
+  editCard(selectedCard: Card): void {
     const dialogRef = this.dialog.open(EditCardDialog, {
-      width: '250px',
-      data: card
+      data: {id: selectedCard.id, text: selectedCard.text, blanks: selectedCard.blanks}
+    });
+
+    dialogRef.afterClosed().subscribe(data => {
+      let putCard = new CardPutt();
+      putCard.text = data.text;
+      putCard.blanks = data.blanks;
+      // Create new card
+      let newCard: Card;
+      this.apiService.putCardCallback(putCard, ((cardFromPut) => {
+        newCard = cardFromPut;
+        // Remove the old card from the deck
+        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe((deck) => {
+          // Add the new card to the deck
+          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).subscribe((deck) => {
+            // Update the deck array and the currently selected deck
+            this.apiService.getDecks().subscribe(decks => {
+              this.allDecks = decks['decks'];
+              this.showDeck(this.deck.id);
+            });
+          });
+        });
+      }));
+    });
+  }
+
+  deleteCard(selectedCard: Card): void {
+    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
+      this.deck = deck;
+      this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
     });
   }
 }
@@ -58,8 +84,9 @@ export class HomeComponent implements OnInit {
 })
 export class EditCardDialog {
   constructor(
-    public dialogRef: MatDialogRef<EditCardDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: Card) {}
+      public dialogRef: MatDialogRef<EditCardDialog>,
+      @Inject(MAT_DIALOG_DATA) public data: Card
+    ) {}
 
   onNoClick(): void {
     this.dialogRef.close();
