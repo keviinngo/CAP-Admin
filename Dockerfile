@@ -13,11 +13,10 @@ ADD package.json /admin/
 WORKDIR /admin
 RUN npm install
 
-ADD . /admin
-
-RUN ng build --base-href="/admin/" --prod=true
-
-RUN service nginx stop
 COPY ./nginx.conf /etc/nginx/nginx.conf
+RUN service nginx stop
+
+ADD . /admin
+RUN ng build --base-href="/admin/" --prod=true
 
 CMD ["nginx", "-g", "daemon off;"]
