@@ -1,13 +1,16 @@
 <div class="grid">
-    <div class="deckContainer">
-        <h1 class="title">
-            Decks
-        </h1>
-        <h1 id="deckSearch">
-            Search
-        </h1>
-        <div id="listDecks">
-            <mat-card *ngFor="let object of allDecks" style="margin-top: 5px; margin-bottom: 5px;">
+    <section id="deckContainer">
+        <div id="title" class="title">
+            <h1>
+                Decks
+            </h1>
+        </div>
+        <mat-form-field id="deckSearch" class="search">
+            <mat-label for="deckSearch">Search for deck</mat-label>
+            <input matInput type="search" id="deckSearch" [(ngModel)]="deckSearchTerm" (ngModelChange)="deckSearch($event)">
+        </mat-form-field>
+        <section id="listDecks">
+            <mat-card *ngFor="let object of searchedDecks" class="card">
                 <mat-card-content>
                     <h3>
                         {{object.title}}
@@ -17,13 +20,18 @@
                 </mat-card-content> 
                 <button mat-raised-button color="primary" (click)="showDeck(object.id)">Edit</button>
             </mat-card>
-         </div>
-    </div>
-    <div  *ngIf="deck; else noSelectedDeckBlock" class="cardsContainer">
-            <h1 id="deckTitle">{{deck.title}}</h1>
-            <h1 id="cardSearch">Search</h1>
-            <div id="listCards">
-            <mat-card *ngFor="let card of deck.cards" style="margin-top: 5px; margin-bottom: 5px;">
+        </section>
+    </section>
+    <section  *ngIf="deck; else noSelectedDeckBlock" id="cardsContainer">
+        <div id="deckTitle" class="title">
+            <h1>{{deck.title}}</h1>
+        </div>
+        <mat-form-field id="cardSearch" class="search">
+            <mat-label for="cardSearch">Search for cards</mat-label>
+            <input matInput type="search" id="cardSearch" [(ngModel)]="cardSearchTerm" (ngModelChange)="cardSearch($event)">
+        </mat-form-field>
+        <section id="listCards">
+            <mat-card *ngFor="let card of searchedCards" class="card">
                 <mat-card-content>
                     <h3>
                         {{card.text}}
@@ -42,13 +50,15 @@
                     <button mat-raised-button color="warn" (click)="deleteCard(card)">Delete</button>
                 </mat-card-actions>
             </mat-card>
-        </div>
-    </div>
+        </section>
+    </section>
     <ng-template #noSelectedDeckBlock>
-        <div class="cardsContainer">
-            <h1>
-                Please select a deck
-            </h1>
-        </div>
+        <section id="cardsContainer">
+            <div id="deckTitle">
+                <h1>
+                    Please select a deck
+                </h1>
+            </div>
+        </section>
     </ng-template>
 </div>

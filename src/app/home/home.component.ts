@@ -12,7 +12,11 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialo
 })
 export class HomeComponent implements OnInit {
   allDecks: DeckNoCards[];
+  searchedDecks: DeckNoCards[];
+  searchedCards: Card[];
   deck: Deck = null;
+  deckSearchTerm: string;
+  cardSearchTerm: string;
 
   constructor(
     private apiService: ApiService,
@@ -33,13 +37,32 @@ export class HomeComponent implements OnInit {
       //this.getAllDecks;
       this.apiService.getDecks().subscribe(decks => {
         this.allDecks = decks['decks'];
+        this.searchedDecks = this.allDecks;
       });
   }
 
   showDeck(id: number): void {
     this.apiService.getDeck(id).subscribe( deck => {
       this.deck = deck;
+      this.searchedCards = this.deck.cards;
     });
+  }
+
+  deckSearch(value: string): void {
+    if(value != "") {
+      this.searchedDecks = this.allDecks.filter(deck => deck.title.toLowerCase().includes(value.toLowerCase()))
+      console.log(value);
+    } else {
+      this.searchedDecks = this.allDecks;
+    }
+  }
+
+  cardSearch(value: string): void {
+    if(value != "") {
+      this.searchedCards = this.deck.cards.filter(card => card.text.toLowerCase().includes(value.toLowerCase()))
+    } else {
+      this. searchedCards = this.deck.cards;
+    }
   }
 
   editCard(selectedCard: Card): void {
@@ -72,11 +95,20 @@ export class HomeComponent implements OnInit {
 
   deleteCard(selectedCard: Card): void {
     this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
+      console.log("Card deleted from deck");
       this.deck = deck;
       this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
     });
   }
 }
+
+//TODO: Add function for deleting a deck
+
+//TODO: Add function for adding new cards
+
+//TODO: Add function for creating a new deck
+
+//TODO: Add function for importing a deck from another website
 
 @Component({
   selector: 'edit-card-dialog',
