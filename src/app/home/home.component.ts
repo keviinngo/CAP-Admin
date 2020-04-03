@@ -1,8 +1,7 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { ApiService, DeckAll , DeckNoCards, Card} from '../api.service';
+import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt} from '../api.service';
 import { Router } from '@angular/router';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialog';
 
 
@@ -13,7 +12,11 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialo
 })
 export class HomeComponent implements OnInit {
   allDecks: DeckNoCards[];
-  deck = null;
+  searchedDecks: DeckNoCards[];
+  searchedCards: Card[];
+  deck: Deck = null;
+  deckSearchTerm: string;
+  cardSearchTerm: string;
 
   constructor(
     private apiService: ApiService,
@@ -32,25 +35,80 @@ export class HomeComponent implements OnInit {
       });
 
       //this.getAllDecks;
-
       this.apiService.getDecks().subscribe(decks => {
         this.allDecks = decks['decks'];
+        this.searchedDecks = this.allDecks;
       });
   }
 
   showDeck(id: number): void {
-    this.deck = this.apiService.getDeck(id).subscribe( deck => {
+    this.apiService.getDeck(id).subscribe( deck => {
       this.deck = deck;
+      this.searchedCards = this.deck.cards;
     });
   }
 
-  editCard(card: Card): void {
+  deckSearch(value: string): void {
+    if(value != "") {
+      this.searchedDecks = this.allDecks.filter(deck => deck.title.toLowerCase().includes(value.toLowerCase()))
+      console.log(value);
+    } else {
+      this.searchedDecks = this.allDecks;
+    }
+  }
+
+  cardSearch(value: string): void {
+    if(value != "") {
+      this.searchedCards = this.deck.cards.filter(card => card.text.toLowerCase().includes(value.toLowerCase()))
+    } else {
+      this. searchedCards = this.deck.cards;
+    }
+  }
+
+  editCard(selectedCard: Card): void {
     const dialogRef = this.dialog.open(EditCardDialog, {
-      width: '250px',
-      data: card
+      data: {id: selectedCard.id, text: selectedCard.text, blanks: selectedCard.blanks}
+    });
+
+    dialogRef.afterClosed().subscribe(data => {
+      let putCard = new CardPutt();
+      putCard.text = data.text;
+      putCard.blanks = data.blanks;
+      // Create new card
+      let newCard: Card;
+      this.apiService.putCardCallback(putCard, ((cardFromPut) => {
+        newCard = cardFromPut;
+        // Remove the old card from the deck
+        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe((deck) => {
+          // Add the new card to the deck
+          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).subscribe((deck) => {
+            // Update the deck array and the currently selected deck
+            this.apiService.getDecks().subscribe(decks => {
+              this.allDecks = decks['decks'];
+              this.showDeck(this.deck.id);
+            });
+          });
+        });
+      }));
+    });
+  }
+
+  deleteCard(selectedCard: Card): void {
+    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
+      console.log("Card deleted from deck");
+      this.deck = deck;
+      this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
     });
   }
 }
+
+//TODO: Add function for deleting a deck
+
+//TODO: Add function for adding new cards
+
+//TODO: Add function for creating a new deck
+
+//TODO: Add function for importing a deck from another website
 
 @Component({
   selector: 'edit-card-dialog',
@@ -58,8 +116,9 @@ export class HomeComponent implements OnInit {
 })
 export class EditCardDialog {
   constructor(
-    public dialogRef: MatDialogRef<EditCardDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: Card) {}
+      public dialogRef: MatDialogRef<EditCardDialog>,
+      @Inject(MAT_DIALOG_DATA) public data: Card
+    ) {}
 
   onNoClick(): void {
     this.dialogRef.close();

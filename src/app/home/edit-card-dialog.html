@@ -1,11 +1,16 @@
 <h1 mat-dialog-title>Edit for card: {{data.id}}</h1>
 <div mat-dialog-content>
-  <p>What's your favorite animal?</p>
-  <mat-form-field>
-    <mat-label>Favorite Animal</mat-label>
-  </mat-form-field>
+    <mat-form-field>
+      <mat-label>Card text </mat-label>
+      <textarea name="text" id="" cols="30" rows="10" matInput [(ngModel)]="data.text"></textarea>
+    </mat-form-field>
+    <br>
+    <mat-form-field>
+      <mat-label>Number of blanks</mat-label>
+      <input type="number" matInput [(ngModel)]="data.blanks">
+    </mat-form-field>
 </div>
 <div mat-dialog-actions>
   <button mat-button (click)="onNoClick()">No Thanks</button>
-  <button mat-button [mat-dialog-close]="data.text" cdkFocusInitial>Ok</button>
+  <button mat-button [mat-dialog-close]="data" cdkFocusInitial>Ok</button>
 </div>

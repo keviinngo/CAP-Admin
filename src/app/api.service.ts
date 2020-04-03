@@ -79,17 +79,42 @@ export class ApiService {
     );
   }
 
-  putCard(card: CardPutt, token: string): Observable<Card> {
+  putCard(card: CardPutt): Observable<Card> {
     return this.http.put<Card>(this.path + `card/`,
       card,
-      this.putHeader(token)
+      this.putHeader(this.token['token'])
     );
+  }
+
+  putCardCallback(card: CardPutt, callback: (card: Card) => void): void {
+    this.http.post<Card>(this.path + `card/`,
+      card,
+      this.putHeader(this.token['token'])
+    ).subscribe(card => {
+      if (card) {
+        callback(card);
+      }
+    });
   }
 
   putDeck(deck: DeckPutt, token: string): Observable<Deck> {
     return this.http.put<Deck>(this.path + `deck/`,
       deck,
       this.putHeader(token)
+    );
+  }
+
+  patchDeckRemoveCard(deckID: number, cardID: number): Observable<Deck> {
+    return this.http.patch<Deck>(this.path + `deck/${deckID}/remove/${cardID}`,
+      null,
+      this.putHeader(this.token['token'])
+    );
+  }
+
+  patchDeckAddCard(deckID: number, cardID: number): Observable<Deck> {
+    return this.http.patch<Deck>(this.path + `deck/${deckID}/add/${cardID}`,
+    null,
+    this.putHeader(this.token['token'])
     );
   }
 

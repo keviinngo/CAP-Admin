@@ -1,44 +1,107 @@
-.content {
-    display: flex;
-    padding: 0 16px;
-    max-width: 960px;
-    flex-direction: column;
-    align-items: center;
-  }
-
-table {
-    width: 100%;
-}
-
-.card {
-    margin-bottom: 50px;
-}
-
 .grid {
+  max-height: 100vh;
+  display: grid;
+  row-gap: 15px;
+  column-gap: 15px;
+
+  grid-template-columns: auto 45% 45% auto;
+  grid-template-rows: 5px auto 5px;
+  grid-template-areas: 
+      ". . . ."
+      ". decks cards ."
+      ". . . ."
+      ;
+}
+
+@media only screen and (max-width: 768px) {
+  .grid {
+    max-height: 100vh;
     display: grid;
     row-gap: 15px;
     column-gap: 15px;
-
+  
     grid-template-columns: auto 45% 45% auto;
-    grid-template-rows: 5px auto 5px;
+    grid-template-rows: 5px auto auto 5px;
+    grid-template-areas: 
+      ". . . ."
+      "decks decks decks decks"
+      "cards cards cards cards"
+      ". . . ."
+      ;
   }
+}
 
-  .deckContainer {
-    height: 85vh;
-    overflow: auto;
-    grid-column-start: 2;
-    grid-column-end: 3;
-    grid-row-start: 2;
-    grid-row-end: 3;
-  }
+#deckContainer {
+  grid-area: decks;
 
-  .cardsContainer {
-    height: 85vh;
-    overflow: auto;
-    grid-column: 3 / 4;
-    grid-row: 2/3;
-  }
+  display: grid;
+  grid-template-columns: 100%;
+  grid-template-rows: 100px 100px auto;
+  grid-template-areas: 
+    "title"
+    "deckSearch"
+    "deckList"
+  ;
+}
 
-  .deck {
-      display: block;
-  }
+#cardsContainer {
+  grid-area: cards;
+
+  display: grid;
+
+  grid-template-columns: 100%;
+  grid-template-rows: 100px 100px auto;
+  grid-template-areas:
+  "deckTitle"
+  "cardSearch"
+  "cardList";
+}
+
+.title {
+  text-align: center;
+  margin: auto;
+}
+
+.title h1 {
+  font-weight: 500;
+}
+
+.search {
+  margin: 20px;
+  align-items: center;
+}
+
+.card {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+#deckTitle {
+  grid-area: deckTitle;
+  text-align: center;
+  margin: auto;
+}
+
+#deckTitle h1 {
+  font-weight: 500;
+}
+
+#title {
+  grid-area: title;
+}
+
+#cardSearch {
+  grid-area: cardSearch;
+}
+
+#deckSearch {
+  grid-area: deckSearch
+}
+
+#listCards {
+  grid-area: cardList;
+}
+
+#listDecks {
+  grid-area: deckList; 
+}
