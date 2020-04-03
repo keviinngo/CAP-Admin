@@ -119,7 +119,7 @@ export class HomeComponent implements OnInit {
 
   //TODO: Add function for importing a deck from another website
   importDeck(deckID: number): void {
-
+    this.apiService.getCardCastDeckInfo(deckID).subscribe(info => {}) //TODO: continue
   }
 
 }

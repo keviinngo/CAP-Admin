@@ -8,6 +8,7 @@ import { LocalStorage } from '@ngx-pwa/local-storage';
 })
 export class ApiService {
   private path = 'https://cap.thebirk.net/';
+  private cardCastPath = 'https://api.cardcastgame.com/v1/decks/'
   private token = {'token': ''}
   private decks: Deck[];
   private cards: Card[];
@@ -141,11 +142,51 @@ export class ApiService {
       )
     })
   }
+
+  getCardCastDeckInfo(deckID: number): Observable<CardCastInfo> {
+    return this.http.get<CardCastInfo>(this.cardCastPath, this.getHeader)
+  }
+
+  getCardCastDeckCalls(deckID: number): Observable<CardCastCallCard> {
+    return this.http.get<CardCastCallCard>(this.cardCastPath, this.getHeader)
+  }
+
+  getCardCastDeckResponses(deckID: number): Observable<CardCastCallCard> {
+    return this.http.get<CardCastCallCard>(this.cardCastPath, this.getHeader)
+  }
 }
 
 export class Token {
   access_token: string
   token_type: string
+}
+
+interface CardCastInfo {
+  name: string
+  code: string
+  description: string
+  unlisted: boolean
+  created_at: Date
+  updated_at : Date
+  external_copyright: string
+  copyright_holder_url: string
+  category: string
+  call_count: string
+  response_count: string
+  author: {
+    id: string
+    username: string
+  }
+  rating: string
+}
+
+interface CardCastCallCard {
+  [index: number]: {
+    id: string
+    text: string[]
+    created_at: string
+    nsfw: boolean
+  }
 }
 
 interface iDeck {
