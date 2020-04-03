@@ -97,10 +97,10 @@ export class ApiService {
     });
   }
 
-  putDeck(deck: DeckPutt, token: string): Observable<Deck> {
+  putDeck(deck: DeckPutt): Observable<Deck> {
     return this.http.put<Deck>(this.path + `deck/`,
       deck,
-      this.putHeader(token)
+      this.putHeader(this.token['token'])
     );
   }
 
@@ -115,6 +115,12 @@ export class ApiService {
     return this.http.patch<Deck>(this.path + `deck/${deckID}/add/${cardID}`,
     null,
     this.putHeader(this.token['token'])
+    );
+  }
+
+  deleteDeck(deckID: number): Observable<Deck> {
+    return this.http.delete<Deck>(this.path + `deck/delete/${deckID}`,
+    this.putHeader(this.token['token'])    
     );
   }
 

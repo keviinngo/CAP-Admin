@@ -1,5 +1,5 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt} from '../api.service';
+import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt, DeckPutt} from '../api.service';
 import { Router } from '@angular/router';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialog';
@@ -101,15 +101,29 @@ export class HomeComponent implements OnInit {
       this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
     });
   }
+
+
+  deleteDeck(selectedDeck: Deck): void {
+    this.apiService.deleteDeck(selectedDeck.id).subscribe(deletedDeck => {}); //TODO: maybe do something with the data idk.
+  }
+
+
+  createNewCard(newCard: CardPutt): void {
+    this.apiService.putCard(newCard).subscribe(createdCard => {}); //TODO: Do something with the newly made card
+  }
+
+
+  createNewDeck(newDeck: DeckPutt): void {
+    this.apiService.putDeck(newDeck).subscribe(createdDeck => {}) //TODO: Do something with the created deck
+  }
+
+  //TODO: Add function for importing a deck from another website
+  importDeck(deckID: number): void {
+
+  }
+
 }
 
-//TODO: Add function for deleting a deck
-
-//TODO: Add function for adding new cards
-
-//TODO: Add function for creating a new deck
-
-//TODO: Add function for importing a deck from another website
 
 @Component({
   selector: 'edit-card-dialog',
