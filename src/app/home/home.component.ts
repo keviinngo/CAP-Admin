@@ -97,6 +97,7 @@ export class HomeComponent implements OnInit {
     this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
       console.log("Card deleted from deck");
       this.deck = deck;
+      this.cardSearch(this.cardSearchTerm);
       this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
     });
   }
