@@ -93,6 +93,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  //TODO: Add dialog box for deleting card
   deleteCard(selectedCard: Card): void { //TODO: Need to handle errors
     this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then(deck => {
       console.log("Card deleted from deck");
@@ -103,8 +104,14 @@ export class HomeComponent implements OnInit {
   }
 
 
+  //TODO: Add dialog box for deleting deck
   deleteDeck(selectedDeck: Deck): void {
-    this.apiService.deleteDeck(selectedDeck.id).toPromise().then(deletedDeck => {}); //TODO: maybe do something with the data idk.
+    this.apiService.deleteDeck(selectedDeck.id).toPromise().finally(() => {
+      this.apiService.getDecks().toPromise().then(decks => {
+        this.allDecks = decks['decks'];
+        this.searchedDecks = this.allDecks;
+      });
+    }) //TODO: maybe do something with the data idk.
   }
 
   createNewCard(newCard: CardPutt): void {
