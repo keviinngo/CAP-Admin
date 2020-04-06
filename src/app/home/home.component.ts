@@ -41,6 +41,10 @@ export class HomeComponent implements OnInit {
       });
   }
 
+  scroll(el: string) {
+    document.querySelector(el).scrollIntoView({ behavior: 'smooth' });
+  }
+
   showDeck(id: number): void {
     this.apiService.getDeck(id).toPromise().then( deck => {
       this.deck = deck;
