@@ -80,6 +80,8 @@ export class HomeComponent implements OnInit {
       putCard.blanks = data.blanks;
       // Create new card
       let newCard: Card;
+
+      //TODO: make this nicer
       this.apiService.putCardCallback(putCard, ((cardFromPut) => {
         newCard = cardFromPut;
         // Remove the old card from the deck
@@ -141,8 +143,7 @@ export class HomeComponent implements OnInit {
       let responses = await this.apiService.getCardCastDeckResponses(deckID).toPromise();
       console.log(responses);
 
-      for (let i = 0; i < calls.length; i++) {
-        let card = calls[i];
+      for (let card of calls) {
         let importedCard: CardPutt =  new CardPutt();
         importedCard.text = "";
 
@@ -171,8 +172,7 @@ export class HomeComponent implements OnInit {
         console.log("CALL OK");
       }
 
-      for (let i = 0; i < responses.length; i++) {
-        let card = responses[i];
+      for (let card of responses) {
         let importedCard: CardPutt =  new CardPutt();
         importedCard.text = "";
 
