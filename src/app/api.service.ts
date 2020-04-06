@@ -81,7 +81,7 @@ export class ApiService {
   }
 
   putCard(card: CardPutt): Observable<Card> {
-    return this.http.put<Card>(this.path + `card/`,
+    return this.http.post<Card>(this.path + `card/`,
       card,
       this.putHeader(this.token['token'])
     );
@@ -99,7 +99,7 @@ export class ApiService {
   }
 
   putDeck(deck: DeckPutt): Observable<Deck> {
-    return this.http.put<Deck>(this.path + `deck/`,
+    return this.http.post<Deck>(this.path + `deck/`,
       deck,
       this.putHeader(this.token['token'])
     );
@@ -143,16 +143,16 @@ export class ApiService {
     })
   }
 
-  getCardCastDeckInfo(deckID: number): Observable<CardCastInfo> {
-    return this.http.get<CardCastInfo>(this.cardCastPath, this.getHeader)
+  getCardCastDeckInfo(deckID: string): Observable<CardCastInfo> {
+    return this.http.get<CardCastInfo>(this.cardCastPath + `${deckID}`, this.getHeader)
   }
 
-  getCardCastDeckCalls(deckID: number): Observable<CardCastCallCard> {
-    return this.http.get<CardCastCallCard>(this.cardCastPath, this.getHeader)
+  getCardCastDeckCalls(deckID: string): Observable<CardCastCallCards> {
+    return this.http.get<CardCastCallCards>(this.cardCastPath + `${deckID}/calls`, this.getHeader)
   }
 
-  getCardCastDeckResponses(deckID: number): Observable<CardCastCallCard> {
-    return this.http.get<CardCastCallCard>(this.cardCastPath, this.getHeader)
+  getCardCastDeckResponses(deckID: string): Observable<CardCastCallCards> {
+    return this.http.get<CardCastCallCards>(this.cardCastPath + `${deckID}/responses`, this.getHeader)
   }
 }
 
@@ -180,14 +180,14 @@ interface CardCastInfo {
   rating: string
 }
 
-interface CardCastCallCard {
-  [index: number]: {
-    id: string
-    text: string[]
-    created_at: string
-    nsfw: boolean
-  }
+interface CardCastCallCard{
+  id: string
+  text: string[]
+  created_at: string
+  nsfw: boolean
 }
+
+interface CardCastCallCards extends Array<CardCastCallCard>{}
 
 interface iDeck {
   title: string;

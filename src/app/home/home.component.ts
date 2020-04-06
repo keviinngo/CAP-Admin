@@ -3,6 +3,7 @@ import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt, DeckPutt} from
 import { Router } from '@angular/router';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialog';
+import { async } from '@angular/core/testing';
 
 
 @Component({
@@ -21,7 +22,6 @@ export class HomeComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private _http: HttpClient,
     public dialog: MatDialog
   ) { }
 
@@ -35,21 +35,21 @@ export class HomeComponent implements OnInit {
       });
 
       //this.getAllDecks;
-      this.apiService.getDecks().subscribe(decks => {
+      this.apiService.getDecks().toPromise().then(decks => {
         this.allDecks = decks['decks'];
         this.searchedDecks = this.allDecks;
       });
   }
 
   showDeck(id: number): void {
-    this.apiService.getDeck(id).subscribe( deck => {
+    this.apiService.getDeck(id).toPromise().then( deck => {
       this.deck = deck;
       this.searchedCards = this.deck.cards;
     });
   }
 
   deckSearch(value: string): void {
-    if(value != "") {
+    if (value != "") {
       this.searchedDecks = this.allDecks.filter(deck => deck.title.toLowerCase().includes(value.toLowerCase()))
       console.log(value);
     } else {
@@ -58,19 +58,19 @@ export class HomeComponent implements OnInit {
   }
 
   cardSearch(value: string): void {
-    if(value != "") {
+    if (value != "") {
       this.searchedCards = this.deck.cards.filter(card => card.text.toLowerCase().includes(value.toLowerCase()))
     } else {
       this. searchedCards = this.deck.cards;
     }
   }
 
-  editCard(selectedCard: Card): void {
+  editCard(selectedCard: Card): void { //TODO: Handle errors
     const dialogRef = this.dialog.open(EditCardDialog, {
       data: {id: selectedCard.id, text: selectedCard.text, blanks: selectedCard.blanks}
     });
 
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed().toPromise().then(data => {
       let putCard = new CardPutt();
       putCard.text = data.text;
       putCard.blanks = data.blanks;
@@ -79,11 +79,11 @@ export class HomeComponent implements OnInit {
       this.apiService.putCardCallback(putCard, ((cardFromPut) => {
         newCard = cardFromPut;
         // Remove the old card from the deck
-        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe((deck) => {
+        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then((deck) => {
           // Add the new card to the deck
-          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).subscribe((deck) => {
+          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).toPromise().then((deck) => {
             // Update the deck array and the currently selected deck
-            this.apiService.getDecks().subscribe(decks => {
+            this.apiService.getDecks().toPromise().then(decks => {
               this.allDecks = decks['decks'];
               this.showDeck(this.deck.id);
             });
@@ -93,35 +93,114 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  deleteCard(selectedCard: Card): void {
-    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
+  deleteCard(selectedCard: Card): void { //TODO: Need to handle errors
+    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then(deck => {
       console.log("Card deleted from deck");
       this.deck = deck;
       this.cardSearch(this.cardSearchTerm);
-      this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
+      this.apiService.getDecks().toPromise().then((decks) => {this.allDecks = decks['decks']});
     });
   }
 
 
   deleteDeck(selectedDeck: Deck): void {
-    this.apiService.deleteDeck(selectedDeck.id).subscribe(deletedDeck => {}); //TODO: maybe do something with the data idk.
+    this.apiService.deleteDeck(selectedDeck.id).toPromise().then(deletedDeck => {}); //TODO: maybe do something with the data idk.
   }
 
-
   createNewCard(newCard: CardPutt): void {
-    this.apiService.putCard(newCard).subscribe(createdCard => {}); //TODO: Do something with the newly made card
+    this.apiService.putCard(newCard).toPromise().then(createdCard => {}); //TODO: Do something with the newly made card
   }
 
 
   createNewDeck(newDeck: DeckPutt): void {
-    this.apiService.putDeck(newDeck).subscribe(createdDeck => {}) //TODO: Do something with the created deck
+    this.apiService.putDeck(newDeck).toPromise().then(createdDeck => {}) //TODO: Do something with the created deck
   }
 
   //TODO: Add function for importing a deck from another website
-  importDeck(deckID: number): void {
-    this.apiService.getCardCastDeckInfo(deckID).subscribe(info => {}) //TODO: continue
-  }
+  importDeck(deckID: string): void {
+    let importedDeck = new DeckPutt();
+    importedDeck.cards = []
 
+    this.apiService.getCardCastDeckInfo(deckID).toPromise().then(async info => {
+      importedDeck.title = info.name;
+      importedDeck.description = info.description;
+
+      let calls = await this.apiService.getCardCastDeckCalls(deckID).toPromise();
+      console.log(calls);
+      let responses = await this.apiService.getCardCastDeckResponses(deckID).toPromise();
+      console.log(responses);
+
+      for (let i = 0; i < calls.length; i++) {
+        let card = calls[i];
+        let importedCard: CardPutt =  new CardPutt();
+        importedCard.text = "";
+
+        if (card.text.length == 1) {
+          importedCard.blanks = 0;
+          card.text.forEach(text => {
+            importedCard.text += text;
+          });
+
+        } else {
+          importedCard.blanks = card.text.length - 1;
+
+          card.text.forEach( (text, index) => {
+            if (index == 0) {
+              importedCard.text += text + "____";
+            } else if (index == card.text.length - 1) {
+              importedCard.text += text;
+            } else {
+              importedCard.text += text + "____";
+            }
+          });
+        }
+
+        let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+        importedDeck.cards.push(cardResponse.id);
+        console.log("CALL OK");
+      }
+
+      for (let i = 0; i < responses.length; i++) {
+        let card = responses[i];
+        let importedCard: CardPutt =  new CardPutt();
+        importedCard.text = "";
+
+        if (card.text.length == 1) {
+          importedCard.blanks = 0;
+          card.text.forEach(text => {
+            importedCard.text += text;
+          });
+
+        } else {
+          importedCard.blanks = card.text.length - 1;
+
+          card.text.forEach( (text, index) => {
+            if (index == 0) {
+              importedCard.text += text + "____";
+            } else if (index == card.text.length - 1) {
+              importedCard.text += text;
+            } else {
+              importedCard.text += text + "____";
+            }
+          });
+        }
+        let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+        importedDeck.cards.push(cardResponse.id);
+        console.log("RESPONSE OK");
+      }    
+    }, error => {
+      //TODO: handle error
+    }).finally(() => {
+      this.apiService.putDeck(importedDeck).toPromise().then(deck => {
+        this.apiService.getDecks().toPromise().then(decks => {
+          this.allDecks = decks['decks'];
+          this.searchedDecks = this.allDecks;
+          this.deck = deck;
+          this.searchedCards = deck.cards;
+        });
+      })
+    })
+  }
 }
 
 
@@ -154,7 +233,7 @@ export class EditCardDialog {
 
   getAllDecks() {
     this.apiService.getDecks()
-    .subscribe(
+    .toPromise().then(
       (decks: any[]) => {
         this.allDecks = decks;
         console.log("Hentet deck");
