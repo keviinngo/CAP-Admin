@@ -105,7 +105,7 @@ export class HomeComponent implements OnInit {
       console.log("Card deleted from deck");
       this.deck = deck;
       this.cardSearch(this.cardSearchTerm);
-      this.apiService.getDecks().toPromise().then((decks) => {this.allDecks = decks['decks']});
+      this.allDecks = this.apiService.getDecks().toPromise()['decks'];
     });
   }
 
