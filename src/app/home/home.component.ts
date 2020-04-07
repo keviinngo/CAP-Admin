@@ -99,25 +99,37 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  //TODO: Add dialog box for deleting card
+  
   deleteCard(selectedCard: Card): void { //TODO: Need to handle errors
-    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then(deck => {
-      console.log("Card deleted from deck");
-      this.deck = deck;
-      this.cardSearch(this.cardSearchTerm);
-      this.allDecks = this.apiService.getDecks().toPromise()['decks'];
+    const dialogRef = this.dialog.open(DeleteDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+          this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then(deck => {
+          console.log("Card deleted from deck");
+          this.deck = deck;
+          this.cardSearch(this.cardSearchTerm);
+          this.apiService.getDecks().toPromise().then((decks) => {this.allDecks = decks['decks']});
+        });
+      }
     });
   }
 
 
-  //TODO: Add dialog box for deleting deck
+  
   deleteDeck(selectedDeck: Deck): void {
-    this.apiService.deleteDeck(selectedDeck.id).toPromise().finally(() => {
-      this.apiService.getDecks().toPromise().then(decks => {
-        this.allDecks = decks['decks'];
-        this.searchedDecks = this.allDecks;
-      });
-    }) //TODO: maybe do something with the data idk.
+    const dialogRef = this.dialog.open(DeleteDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+            this.apiService.deleteDeck(selectedDeck.id).toPromise().finally(() => {
+          this.apiService.getDecks().toPromise().then(decks => {
+            this.allDecks = decks['decks'];
+            this.searchedDecks = this.allDecks;
+          });
+        }) //TODO: maybe do something with the data idk.
+      }
+    });
   }
 
   createNewCard(newCard: CardPutt): void {
@@ -230,35 +242,14 @@ export class EditCardDialog {
   }
 }
 
+@Component({
+  selector: 'delete-dialog',
+  templateUrl: 'delete-dialog.html',
+})
+export class DeleteDialog {
+  constructor(public dialogRef: MatDialogRef<DeleteDialog>) {}
 
-  /*
-  selectedValue: string;
-  selectedContent: string;content: 'This is __'content: 'My name is __'
-
-  
-  decks: Deck[] = [
-    {value: 'Fun Deck', viewValue: 'Test', },
-    {value: 'Crazy Deck', viewValue: 'TestTest', }
-  ];
-  
-
-  getAllDecks() {
-    this.apiService.getDecks()
-    .toPromise().then(
-      (decks: any[]) => {
-        this.allDecks = decks;
-        console.log("Hentet deck");
-      },
-      error => alert(error)
-    )
-    
-  };
-*/
-
-/*
-interface Deck {
-  value: string;
-  viewValue: string;
-  //content: string;
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
 }
-*/
