@@ -99,7 +99,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  //TODO: Add dialog box for deleting card
+  
   deleteCard(selectedCard: Card): void { //TODO: Need to handle errors
     const dialogRef = this.dialog.open(DeleteDialog);
 
@@ -116,7 +116,7 @@ export class HomeComponent implements OnInit {
   }
 
 
-  //TODO: Add dialog box for deleting deck
+  
   deleteDeck(selectedDeck: Deck): void {
     const dialogRef = this.dialog.open(DeleteDialog);
 
@@ -253,36 +253,3 @@ export class DeleteDialog {
     this.dialogRef.close();
   }
 }
-
-
-  /*
-  selectedValue: string;
-  selectedContent: string;content: 'This is __'content: 'My name is __'
-
-  
-  decks: Deck[] = [
-    {value: 'Fun Deck', viewValue: 'Test', },
-    {value: 'Crazy Deck', viewValue: 'TestTest', }
-  ];
-  
-
-  getAllDecks() {
-    this.apiService.getDecks()
-    .toPromise().then(
-      (decks: any[]) => {
-        this.allDecks = decks;
-        console.log("Hentet deck");
-      },
-      error => alert(error)
-    )
-    
-  };
-*/
-
-/*
-interface Deck {
-  value: string;
-  viewValue: string;
-  //content: string;
-}
-*/
