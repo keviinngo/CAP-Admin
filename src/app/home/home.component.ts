@@ -16,8 +16,8 @@ export class HomeComponent implements OnInit {
   searchedDecks: DeckNoCards[];
   searchedCards: Card[];
   deck: Deck = null;
-  deckSearchTerm: string;
-  cardSearchTerm: string;
+  deckSearchTerm: string = "";
+  cardSearchTerm: string = "";
 
   constructor(
     private apiService: ApiService,
