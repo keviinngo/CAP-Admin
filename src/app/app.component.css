@@ -1,5 +1,35 @@
-.toolbar {
-  background-color: #1976d2;
+.header {
+  background-color: #6A1B9A;
   color: white;
-  font-weight: 600;
+  padding: 20px 10px;
+  overflow: hidden;
+}
+
+.header a.title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.header a {
+  float: left;
+  color: white;
+  text-align: center;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  line-height: 25px;
+  border-radius: 4px;
+}
+
+.header a:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.header a.active {
+  color: white;
+}
+
+.header-right {
+  float: right;
 }
