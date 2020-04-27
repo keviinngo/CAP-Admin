@@ -4,12 +4,7 @@
             <h1>
                 Decks
             </h1>
-
-            <mat-form-field>
-                <mat-label for="import">deck ID from Cardcast</mat-label>
-                <input matInput #deckID type="text" id="deckID">
-            </mat-form-field>
-            <button mat-raised-button (click)="importDeck(deckID.value)">Import deck</button>
+            <button mat-raised-button (click)="importDeck()">Import deck</button>
         </div>
         <mat-form-field id="deckSearch" class="search">
             <mat-label for="deckSearch">Search for available deck</mat-label>
