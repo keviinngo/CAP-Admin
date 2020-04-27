@@ -1,8 +1,9 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt} from '../api.service';
+import { ApiService, DeckAll , DeckNoCards, Card, Deck, CardPutt, DeckPutt} from '../api.service';
 import { Router } from '@angular/router';
 import { HttpClientModule, HttpClient, HttpHeaders } from '@angular/common/http';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog} from '@angular/material/dialog';
+import { async } from '@angular/core/testing';
 
 
 @Component({
@@ -15,13 +16,12 @@ export class HomeComponent implements OnInit {
   searchedDecks: DeckNoCards[];
   searchedCards: Card[];
   deck: Deck = null;
-  deckSearchTerm: string;
-  cardSearchTerm: string;
+  deckSearchTerm: string = "";
+  cardSearchTerm: string = "";
 
   constructor(
     private apiService: ApiService,
     private router: Router,
-    private _http: HttpClient,
     public dialog: MatDialog
   ) { }
 
@@ -35,21 +35,25 @@ export class HomeComponent implements OnInit {
       });
 
       //this.getAllDecks;
-      this.apiService.getDecks().subscribe(decks => {
+      this.apiService.getDecks().toPromise().then(decks => {
         this.allDecks = decks['decks'];
         this.searchedDecks = this.allDecks;
       });
   }
 
+  scroll(el: string) {
+    document.querySelector(el).scrollIntoView({ behavior: 'smooth' });
+  }
+
   showDeck(id: number): void {
-    this.apiService.getDeck(id).subscribe( deck => {
+    this.apiService.getDeck(id).toPromise().then( deck => {
       this.deck = deck;
       this.searchedCards = this.deck.cards;
     });
   }
 
   deckSearch(value: string): void {
-    if(value != "") {
+    if (value != "") {
       this.searchedDecks = this.allDecks.filter(deck => deck.title.toLowerCase().includes(value.toLowerCase()))
       console.log(value);
     } else {
@@ -58,32 +62,34 @@ export class HomeComponent implements OnInit {
   }
 
   cardSearch(value: string): void {
-    if(value != "") {
+    if (value != "") {
       this.searchedCards = this.deck.cards.filter(card => card.text.toLowerCase().includes(value.toLowerCase()))
     } else {
       this. searchedCards = this.deck.cards;
     }
   }
 
-  editCard(selectedCard: Card): void {
+  editCard(selectedCard: Card): void { //TODO: Handle errors
     const dialogRef = this.dialog.open(EditCardDialog, {
       data: {id: selectedCard.id, text: selectedCard.text, blanks: selectedCard.blanks}
     });
 
-    dialogRef.afterClosed().subscribe(data => {
+    dialogRef.afterClosed().toPromise().then(data => {
       let putCard = new CardPutt();
       putCard.text = data.text;
       putCard.blanks = data.blanks;
       // Create new card
       let newCard: Card;
+
+      //TODO: make this nicer
       this.apiService.putCardCallback(putCard, ((cardFromPut) => {
         newCard = cardFromPut;
         // Remove the old card from the deck
-        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe((deck) => {
+        this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then((deck) => {
           // Add the new card to the deck
-          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).subscribe((deck) => {
+          this.apiService.patchDeckAddCard(this.deck.id, newCard.id).toPromise().then((deck) => {
             // Update the deck array and the currently selected deck
-            this.apiService.getDecks().subscribe(decks => {
+            this.apiService.getDecks().toPromise().then(decks => {
               this.allDecks = decks['decks'];
               this.showDeck(this.deck.id);
             });
@@ -93,22 +99,138 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  deleteCard(selectedCard: Card): void {
-    this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).subscribe(deck => {
-      console.log("Card deleted from deck");
-      this.deck = deck;
-      this.apiService.getDecks().subscribe((decks) => {this.allDecks = decks['decks']});
+  
+  deleteCard(selectedCard: Card): void { //TODO: Need to handle errors
+    const dialogRef = this.dialog.open(DeleteDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+          this.apiService.patchDeckRemoveCard(this.deck.id, selectedCard.id).toPromise().then(deck => {
+          console.log("Card deleted from deck");
+          this.deck = deck;
+          this.searchedCards = this.deck.cards;
+          this.cardSearch(this.cardSearchTerm);
+        });
+      }
+    });
+  }
+
+
+  
+  deleteDeck(selectedDeck: Deck): void {
+    const dialogRef = this.dialog.open(DeleteDialog);
+
+    dialogRef.afterClosed().subscribe(result => {
+      if(result) {
+            this.apiService.deleteDeck(selectedDeck.id).toPromise().finally(() => {
+          this.apiService.getDecks().toPromise().then(decks => {
+            this.allDecks = decks['decks'];
+            this.searchedDecks = this.allDecks;
+          });
+        }) //TODO: maybe do something with the data idk.
+      }
+    });
+  }
+
+  createNewCard(newCard: CardPutt): void {
+    this.apiService.putCard(newCard).toPromise().then(createdCard => {}); //TODO: Do something with the newly made card
+  }
+
+
+  createNewDeck(newDeck: DeckPutt): void {
+    this.apiService.putDeck(newDeck).toPromise().then(createdDeck => {}) //TODO: Do something with the created deck
+  }
+
+  //TODO: Add function for importing a deck from another website
+  importDeck(): void {
+    const dialogRef = this.dialog.open(ImportDialog, {data: {id: ""}});
+    let importedDeck = new DeckPutt();
+    importedDeck.cards = []
+
+    dialogRef.afterClosed().toPromise().then(deck => {
+      if (deck) {
+        this.apiService.getCardCastDeckInfo(deck.id).toPromise().then(async info => {
+          importedDeck.title = info.name;
+          importedDeck.description = info.description;
+    
+          let calls = await this.apiService.getCardCastDeckCalls(deck.id).toPromise();
+          console.log(calls);
+          let responses = await this.apiService.getCardCastDeckResponses(deck.id).toPromise();
+          console.log(responses);
+    
+          for (let card of calls) {
+            let importedCard: CardPutt =  new CardPutt();
+            importedCard.text = "";
+    
+            if (card.text.length == 1) {
+              importedCard.blanks = 0;
+              card.text.forEach(text => {
+                importedCard.text += text;
+              });
+    
+            } else {
+              importedCard.blanks = card.text.length - 1;
+    
+              card.text.forEach( (text, index) => {
+                if (index == 0) {
+                  importedCard.text += text + "____";
+                } else if (index == card.text.length - 1) {
+                  importedCard.text += text;
+                } else {
+                  importedCard.text += text + "____";
+                }
+              });
+            }
+    
+            let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+            importedDeck.cards.push(cardResponse.id);
+            console.log("CALL OK");
+          }
+    
+          for (let card of responses) {
+            let importedCard: CardPutt =  new CardPutt();
+            importedCard.text = "";
+    
+            if (card.text.length == 1) {
+              importedCard.blanks = 0;
+              card.text.forEach(text => {
+                importedCard.text += text;
+              });
+    
+            } else {
+              importedCard.blanks = card.text.length - 1;
+    
+              card.text.forEach( (text, index) => {
+                if (index == 0) {
+                  importedCard.text += text + "____";
+                } else if (index == card.text.length - 1) {
+                  importedCard.text += text;
+                } else {
+                  importedCard.text += text + "____";
+                }
+              });
+            }
+            let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+            importedDeck.cards.push(cardResponse.id);
+            console.log("RESPONSE OK");
+          }    
+        }, error => {
+          //TODO: handle error
+        }).finally(() => {
+          this.apiService.putDeck(importedDeck).toPromise().then(deck => {
+            this.apiService.getDecks().toPromise().then(decks => {
+              this.allDecks = decks['decks'];
+              this.searchedDecks = this.allDecks;
+              this.deck = deck;
+              this.searchedCards = deck.cards;
+            });
+          })
+        })
+      }
     });
   }
 }
 
-//TODO: Add function for deleting a deck
-
-//TODO: Add function for adding new cards
-
-//TODO: Add function for creating a new deck
-
-//TODO: Add function for importing a deck from another website
 
 @Component({
   selector: 'edit-card-dialog',
@@ -125,35 +247,35 @@ export class EditCardDialog {
   }
 }
 
+@Component({
+  selector: 'delete-dialog',
+  templateUrl: 'delete-dialog.html',
+})
+export class DeleteDialog {
+  constructor(public dialogRef: MatDialogRef<DeleteDialog>) {}
 
-  /*
-  selectedValue: string;
-  selectedContent: string;content: 'This is __'content: 'My name is __'
-
-  
-  decks: Deck[] = [
-    {value: 'Fun Deck', viewValue: 'Test', },
-    {value: 'Crazy Deck', viewValue: 'TestTest', }
-  ];
-  
-
-  getAllDecks() {
-    this.apiService.getDecks()
-    .subscribe(
-      (decks: any[]) => {
-        this.allDecks = decks;
-        console.log("Hentet deck");
-      },
-      error => alert(error)
-    )
-    
-  };
-*/
-
-/*
-interface Deck {
-  value: string;
-  viewValue: string;
-  //content: string;
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
 }
-*/
+
+@Component({
+  selector: 'import-dialog',
+  templateUrl: 'import-dialog.html'
+})
+export class ImportDialog {
+  constructor(
+    public dialogRef: MatDialogRef<ImportDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: Code
+  ) {}
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+
+
+}
+
+export interface Code {
+  id: string;
+}

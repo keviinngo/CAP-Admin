@@ -8,6 +8,7 @@ import { LocalStorage } from '@ngx-pwa/local-storage';
 })
 export class ApiService {
   private path = 'https://cap.thebirk.net/';
+  private cardCastPath = 'https://api.cardcastgame.com/v1/decks/'
   private token = {'token': ''}
   private decks: Deck[];
   private cards: Card[];
@@ -80,7 +81,7 @@ export class ApiService {
   }
 
   putCard(card: CardPutt): Observable<Card> {
-    return this.http.put<Card>(this.path + `card/`,
+    return this.http.post<Card>(this.path + `card/`,
       card,
       this.putHeader(this.token['token'])
     );
@@ -97,10 +98,10 @@ export class ApiService {
     });
   }
 
-  putDeck(deck: DeckPutt, token: string): Observable<Deck> {
-    return this.http.put<Deck>(this.path + `deck/`,
+  putDeck(deck: DeckPutt): Observable<Deck> {
+    return this.http.post<Deck>(this.path + `deck/`,
       deck,
-      this.putHeader(token)
+      this.putHeader(this.token['token'])
     );
   }
 
@@ -115,6 +116,12 @@ export class ApiService {
     return this.http.patch<Deck>(this.path + `deck/${deckID}/add/${cardID}`,
     null,
     this.putHeader(this.token['token'])
+    );
+  }
+
+  deleteDeck(deckID: number): Observable<Deck> {
+    return this.http.delete<Deck>(this.path + `deck/delete/${deckID}`,
+    this.putHeader(this.token['token'])    
     );
   }
 
@@ -135,12 +142,52 @@ export class ApiService {
       )
     })
   }
+
+  getCardCastDeckInfo(deckID: string): Observable<CardCastInfo> {
+    return this.http.get<CardCastInfo>(this.cardCastPath + `${deckID}`, this.getHeader)
+  }
+
+  getCardCastDeckCalls(deckID: string): Observable<CardCastCallCards> {
+    return this.http.get<CardCastCallCards>(this.cardCastPath + `${deckID}/calls`, this.getHeader)
+  }
+
+  getCardCastDeckResponses(deckID: string): Observable<CardCastCallCards> {
+    return this.http.get<CardCastCallCards>(this.cardCastPath + `${deckID}/responses`, this.getHeader)
+  }
 }
 
 export class Token {
   access_token: string
   token_type: string
 }
+
+interface CardCastInfo {
+  name: string
+  code: string
+  description: string
+  unlisted: boolean
+  created_at: Date
+  updated_at : Date
+  external_copyright: string
+  copyright_holder_url: string
+  category: string
+  call_count: string
+  response_count: string
+  author: {
+    id: string
+    username: string
+  }
+  rating: string
+}
+
+interface CardCastCallCard{
+  id: string
+  text: string[]
+  created_at: string
+  nsfw: boolean
+}
+
+interface CardCastCallCards extends Array<CardCastCallCard>{}
 
 interface iDeck {
   title: string;

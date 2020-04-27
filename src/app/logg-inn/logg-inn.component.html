@@ -2,13 +2,19 @@
 <form [formGroup]="loginForm" (ngSubmit)="onSubmit(loginForm.value)">
   <mat-form-field>
       <mat-label for="username">Brukernavn</mat-label>
-      <input matInput id="username" type="text" formControlName="username">
-    </mat-form-field>
+      <input matInput id="username" type="text" formControlName="username" [ngClass]="{ 'is-invalid': submitted && f.username.errors }">
+  </mat-form-field>
+      <div *ngIf="submitted && f.username.errors" class="invalid-feedback">
+        <div *ngIf="f.username.errors.required">Brukernavn hint: admin</div>
+      </div>  
     <br>
     <mat-form-field>
       <mat-label for="password">Passord</mat-label>
-      <input matInput id="password" type="password" formControlName="password">
+      <input matInput id="password" type="password" formControlName="password" [ngClass]="{ 'is-invalid': submitted && f.password.errors }" />
     </mat-form-field>
+    <div *ngIf="submitted && f.password.errors" class="invalid-feedback">
+        <div *ngIf="f.password.errors.required">Passord hint: admin</div>
+      </div>
     <br>
-    <button mat-raised-button type="submit">Logg inn</button><br><br>
+    <button mat-raised-button class="btn btn-primary">Logg inn</button><br><br>
 </form>

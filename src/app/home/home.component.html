@@ -4,6 +4,7 @@
             <h1>
                 Decks
             </h1>
+            <button mat-raised-button (click)="importDeck()">Import deck</button>
         </div>
         <mat-form-field id="deckSearch" class="search">
             <mat-label for="deckSearch">Search for deck</mat-label>
@@ -18,7 +19,8 @@
                     <br>
                     {{object.description}}
                 </mat-card-content> 
-                <button mat-raised-button color="primary" (click)="showDeck(object.id)">Edit</button>
+                <button mat-raised-button color="primary" (click)="showDeck(object.id); scroll('#deckTitle')">View</button>
+                <button mat-raised-button color="warn" (click)="deleteDeck(object)" style="margin: 0px 5px;">Delete</button>
             </mat-card>
         </section>
     </section>

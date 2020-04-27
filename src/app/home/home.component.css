@@ -33,6 +33,7 @@
 
 #deckContainer {
   grid-area: decks;
+  max-width: 100vw;
 
   display: grid;
   grid-template-columns: 100%;
@@ -46,6 +47,7 @@
 
 #cardsContainer {
   grid-area: cards;
+  max-width: 100vw;
 
   display: grid;
 
@@ -72,8 +74,7 @@
 }
 
 .card {
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin: 5px;
 }
 
 #deckTitle {
@@ -103,5 +104,5 @@
 }
 
 #listDecks {
-  grid-area: deckList; 
+  grid-area: deckList;
 }
