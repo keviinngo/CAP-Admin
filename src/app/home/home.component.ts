@@ -142,87 +142,92 @@ export class HomeComponent implements OnInit {
   }
 
   //TODO: Add function for importing a deck from another website
-  importDeck(deckID: string): void {
+  importDeck(): void {
+    const dialogRef = this.dialog.open(ImportDialog, {data: {id: ""}});
     let importedDeck = new DeckPutt();
     importedDeck.cards = []
 
-    this.apiService.getCardCastDeckInfo(deckID).toPromise().then(async info => {
-      importedDeck.title = info.name;
-      importedDeck.description = info.description;
-
-      let calls = await this.apiService.getCardCastDeckCalls(deckID).toPromise();
-      console.log(calls);
-      let responses = await this.apiService.getCardCastDeckResponses(deckID).toPromise();
-      console.log(responses);
-
-      for (let card of calls) {
-        let importedCard: CardPutt =  new CardPutt();
-        importedCard.text = "";
-
-        if (card.text.length == 1) {
-          importedCard.blanks = 0;
-          card.text.forEach(text => {
-            importedCard.text += text;
-          });
-
-        } else {
-          importedCard.blanks = card.text.length - 1;
-
-          card.text.forEach( (text, index) => {
-            if (index == 0) {
-              importedCard.text += text + "____";
-            } else if (index == card.text.length - 1) {
-              importedCard.text += text;
+    dialogRef.afterClosed().toPromise().then(deck => {
+      if (deck) {
+        this.apiService.getCardCastDeckInfo(deck.id).toPromise().then(async info => {
+          importedDeck.title = info.name;
+          importedDeck.description = info.description;
+    
+          let calls = await this.apiService.getCardCastDeckCalls(deck.id).toPromise();
+          console.log(calls);
+          let responses = await this.apiService.getCardCastDeckResponses(deck.id).toPromise();
+          console.log(responses);
+    
+          for (let card of calls) {
+            let importedCard: CardPutt =  new CardPutt();
+            importedCard.text = "";
+    
+            if (card.text.length == 1) {
+              importedCard.blanks = 0;
+              card.text.forEach(text => {
+                importedCard.text += text;
+              });
+    
             } else {
-              importedCard.text += text + "____";
+              importedCard.blanks = card.text.length - 1;
+    
+              card.text.forEach( (text, index) => {
+                if (index == 0) {
+                  importedCard.text += text + "____";
+                } else if (index == card.text.length - 1) {
+                  importedCard.text += text;
+                } else {
+                  importedCard.text += text + "____";
+                }
+              });
             }
-          });
-        }
-
-        let cardResponse = await this.apiService.putCard(importedCard).toPromise();
-        importedDeck.cards.push(cardResponse.id);
-        console.log("CALL OK");
+    
+            let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+            importedDeck.cards.push(cardResponse.id);
+            console.log("CALL OK");
+          }
+    
+          for (let card of responses) {
+            let importedCard: CardPutt =  new CardPutt();
+            importedCard.text = "";
+    
+            if (card.text.length == 1) {
+              importedCard.blanks = 0;
+              card.text.forEach(text => {
+                importedCard.text += text;
+              });
+    
+            } else {
+              importedCard.blanks = card.text.length - 1;
+    
+              card.text.forEach( (text, index) => {
+                if (index == 0) {
+                  importedCard.text += text + "____";
+                } else if (index == card.text.length - 1) {
+                  importedCard.text += text;
+                } else {
+                  importedCard.text += text + "____";
+                }
+              });
+            }
+            let cardResponse = await this.apiService.putCard(importedCard).toPromise();
+            importedDeck.cards.push(cardResponse.id);
+            console.log("RESPONSE OK");
+          }    
+        }, error => {
+          //TODO: handle error
+        }).finally(() => {
+          this.apiService.putDeck(importedDeck).toPromise().then(deck => {
+            this.apiService.getDecks().toPromise().then(decks => {
+              this.allDecks = decks['decks'];
+              this.searchedDecks = this.allDecks;
+              this.deck = deck;
+              this.searchedCards = deck.cards;
+            });
+          })
+        })
       }
-
-      for (let card of responses) {
-        let importedCard: CardPutt =  new CardPutt();
-        importedCard.text = "";
-
-        if (card.text.length == 1) {
-          importedCard.blanks = 0;
-          card.text.forEach(text => {
-            importedCard.text += text;
-          });
-
-        } else {
-          importedCard.blanks = card.text.length - 1;
-
-          card.text.forEach( (text, index) => {
-            if (index == 0) {
-              importedCard.text += text + "____";
-            } else if (index == card.text.length - 1) {
-              importedCard.text += text;
-            } else {
-              importedCard.text += text + "____";
-            }
-          });
-        }
-        let cardResponse = await this.apiService.putCard(importedCard).toPromise();
-        importedDeck.cards.push(cardResponse.id);
-        console.log("RESPONSE OK");
-      }    
-    }, error => {
-      //TODO: handle error
-    }).finally(() => {
-      this.apiService.putDeck(importedDeck).toPromise().then(deck => {
-        this.apiService.getDecks().toPromise().then(decks => {
-          this.allDecks = decks['decks'];
-          this.searchedDecks = this.allDecks;
-          this.deck = deck;
-          this.searchedCards = deck.cards;
-        });
-      })
-    })
+    });
   }
 }
 
@@ -252,4 +257,25 @@ export class DeleteDialog {
   onNoClick(): void {
     this.dialogRef.close();
   }
+}
+
+@Component({
+  selector: 'import-dialog',
+  templateUrl: 'import-dialog.html'
+})
+export class ImportDialog {
+  constructor(
+    public dialogRef: MatDialogRef<ImportDialog>,
+    @Inject(MAT_DIALOG_DATA) public data: Code
+  ) {}
+
+  onNoClick(): void {
+    this.dialogRef.close();
+  }
+
+
+}
+
+export interface Code {
+  id: string;
 }
