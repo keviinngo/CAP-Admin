@@ -127,19 +127,23 @@ export class ApiService {
 
   getCurrentUser(callback: (data: User) => void) {
     this.localStorage.getItem('token').subscribe(token => {
-      this.http.get<User>(this.path + 'me/',
-      this.putHeader(token['token'])
-      ).subscribe(user => {
-        console.log(user);
-        if(user != null) {
-          callback(user);
-        }
-      },
-        error => {
-          console.error('Error')
-          callback(null);
-        }
-      )
+      if (token) {
+        this.http.get<User>(this.path + 'me/',
+        this.putHeader(token['token'])
+        ).subscribe(user => {
+          console.log(user);
+          if(user != null) {
+            callback(user);
+          }
+        },
+          error => {
+            console.error('Error')
+            callback(null);
+          }
+        )
+      } else {
+        callback(null);
+      }
     })
   }
 
